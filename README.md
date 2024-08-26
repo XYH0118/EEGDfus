@@ -20,3 +20,6 @@ python train_ssed.py
 
 ## 5. Save the Trained Models
 After training, the models will be saved in the `check_points` folder.
+
+## 6. Contact Information
+For any issues or inquiries, please reach out via email at: [xiaoyanghuang@mail.ustc.edu.cn](mailto:xiaoyanghuang@mail.ustc.edu.cn)
