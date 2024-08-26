@@ -2,7 +2,7 @@
 
 ## 1. Download the Dataset
 Download the EEG denoising dataset from the following link:
-- [https://drive.google.com/drive/folders/1n25Kx7BApBFZX3JX_b1g4V2BM0lAw-Zp?usp=drive_link](#)
+- [https://drive.google.com/drive/folders/1n25Kx7BApBFZX3JX_b1g4V2BM0lAw-Zp?usp=drive_link]
 
 ## 2. Prepare the Data
 Place all downloaded data into the `data` folder located in the root directory of the project.
