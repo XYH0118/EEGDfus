@@ -1,11 +1,5 @@
-import sklearn.model_selection as ms
 import numpy as np
-import scipy.io as sio
-import math
-# Author: Haoming Zhang
-# The code here not only include data importing, but also data standardization and the generation of analog noise signals
 from sklearn import preprocessing
-import matplotlib.pyplot as plt
 
 def get_rms(records, multi_channels):
     """
@@ -29,7 +23,6 @@ def get_SNR(signal, noisy):
     return snr
 
 def random_signal(signal, combin_num):
-    # Random disturb and augment signal
     random_result = []
 
     for i in range(combin_num):
@@ -53,24 +46,23 @@ def prepare_data(combin_num, train_per, noise_type):
         EEG_all = np.load(file_location + 'EEG_all_epochs.npy')
         noise_all = np.load(file_location + 'EMG_all_epochs.npy')
 
-    # Here we use eeg and noise signal to generate scale transed training, validation, test signal
+
     EEG_all_random = np.squeeze(random_signal(signal=EEG_all, combin_num=1))
     noise_all_random = np.squeeze(random_signal(signal=noise_all, combin_num=1))
 
-    if noise_type == 'EMG':  # Training set will Reuse some of the EEG signal to much the number of EMG
+    if noise_type == 'EMG':
         reuse_num = noise_all_random.shape[0] - EEG_all_random.shape[0]
         EEG_reuse = EEG_all_random[0: reuse_num, :]
         EEG_all_random = np.vstack([EEG_reuse, EEG_all_random])
         print('EEG segments after reuse: ', EEG_all_random.shape[0])
 
-    elif noise_type == 'EOG':  # We will drop some of the EEG signal to much the number of EMG
+    elif noise_type == 'EOG':
         EEG_all_random = EEG_all_random[0:noise_all_random.shape[0]]
         print('EEG segments after drop: ', EEG_all_random.shape[0])
 
-    # get the
     timepoint = noise_all_random.shape[1]
-    train_num = round(train_per * EEG_all_random.shape[0])  # the number of segmentations used in training process
-    test_num = round(EEG_all_random.shape[0] - train_num)  # the number of segmentations used in validation process
+    train_num = round(train_per * EEG_all_random.shape[0])
+    test_num = round(EEG_all_random.shape[0] - train_num)
 
     train_eeg = EEG_all_random[0: train_num, :]
     test_eeg = EEG_all_random[train_num: train_num + test_num, :]
@@ -110,28 +102,9 @@ def prepare_data(combin_num, train_per, noise_type):
         noise = noise * coe
         signal_noise = EEG + noise
 
-        # EEG_rms = get_rms(EEG, 0)
-        # noise_rms = get_rms(noise, 0)
-        # SNR_af = get_SNR(EEG_rms, noise_rms)
-        # print(SNR_af)
-
         sn_train.append(signal_noise)
         eeg_train.append(EEG)
 
-        # time = np.arange(0, len(noise))
-        #
-        # plt.subplot(2, 3, 1)
-        # plt.plot(time, EEG, 'steelblue', linewidth=1)
-        #
-        # plt.subplot(2, 3, 2)
-        # plt.plot(time, noise, 'darkorange', linewidth=1)
-        #
-        # plt.subplot(2, 3, 3)
-        # plt.plot(time, signal_noise, 'forestgreen', linewidth=1)
-        #
-        # plt.show()
-
-    # Adding noise to test
     SNR_test_dB = np.linspace(-5.0, 5.0, num=(11))
     SNR_test = np.sqrt(10 ** (0.1 * (SNR_test_dB)))
 
@@ -148,11 +121,6 @@ def prepare_data(combin_num, train_per, noise_type):
             coe = get_rms(EEG, 0) / (get_rms(noise, 0) * SNR_test[i])
             noise = noise * coe
             signal_noise = EEG + noise
-
-            # EEG_rms = get_rms(EEG, 0)
-            # noise_rms = get_rms(noise, 0)
-            # SNR_af = get_SNR(EEG_rms, noise_rms)
-            # print(SNR_af)
 
             sn_test.append(signal_noise)
             eeg_test.append(EEG)

@@ -1,9 +1,5 @@
 import argparse
-
-import numpy as np
 import torch
-import datetime
-import json
 import yaml
 import os
 
@@ -11,12 +7,12 @@ from Data_Preparation.data_prepare_ssed import prepare_data
 
 from DDPM import DDPM
 from denoising_model_seed import DualBranchDenoisingModel
-from utils import train, evaluate
+from utils import train
 
-from torch.utils.data import DataLoader, Subset, ConcatDataset, TensorDataset
+from torch.utils.data import DataLoader, Subset, TensorDataset
 
 from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
+
 
 
 if __name__ == "__main__":
@@ -37,9 +33,6 @@ if __name__ == "__main__":
 
     [X_train, y_train] = prepare_data(r'data/ssed_noise.npy', r'data/ssed_eeg.npy')
 
-    # X_train = np.load(r'./data/noise_train.npy')
-    # y_train = np.load(r'./data/eeg_train.npy')
-
     X_train = torch.FloatTensor(X_train).unsqueeze(dim=1)
     y_train = torch.FloatTensor(y_train).unsqueeze(dim=1)
 
@@ -58,19 +51,11 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_set, batch_size=config['train']['batch_size'], drop_last=True, num_workers=8)
     test_loader = DataLoader(test_set, batch_size=64, num_workers=8)
 
-
     base_model = DualBranchDenoisingModel(config['train']['feats']).to(args.device)
     model = DDPM(base_model, config, args.device)
 
     train(model, config['train'], train_loader, args.device,
           valid_loader=val_loader, valid_epoch_interval=10, foldername=foldername)
-
-    #eval best
-    print('eval')
-    foldername = "./check_points/noise_type_" + args.n_type + "/"
-    output_path = foldername + "/model.pth"
-    model.load_state_dict(torch.load(output_path))
-    evaluate(model, val_loader, args.device)
 
 
 

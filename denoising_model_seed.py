@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from math import log as ln
 
 d_model = 400  # Embedding Size

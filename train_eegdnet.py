@@ -1,7 +1,5 @@
 import argparse
 import torch
-import datetime
-import json
 import yaml
 import os
 
@@ -9,9 +7,9 @@ from Data_Preparation.data_prepare_eegdnet import prepare_data
 
 from DDPM import DDPM
 from denoising_model_eegdnet import DualBranchDenoisingModel
-from utils import train, evaluate
+from utils import train
 
-from torch.utils.data import DataLoader, Subset, ConcatDataset, TensorDataset
+from torch.utils.data import DataLoader, Subset, TensorDataset
 
 from sklearn.model_selection import train_test_split
 
@@ -50,19 +48,11 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_set, batch_size=config['train']['batch_size'], drop_last=True, num_workers=8)
     test_loader = DataLoader(test_set, batch_size=64, num_workers=8)
 
-    # base_model = ConditionalModel(64,8,4).to(args.device)
     base_model = DualBranchDenoisingModel(config['train']['feats']).to(args.device)
     model = DDPM(base_model, config, args.device)
 
     train(model, config['train'], train_loader, args.device,
           valid_loader=val_loader, valid_epoch_interval=10, foldername=foldername)
-
-    # eval best
-    print('eval best')
-    foldername = "./check_points/noise_type_" + args.n_type + "/"
-    output_path = foldername + "/model.pth"
-    model.load_state_dict(torch.load(output_path))
-    evaluate(model, val_loader, args.device)
 
 
 
